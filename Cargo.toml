@@ -1,0 +1,16 @@
+[package]
+name = "statusbar"
+version = "0.1.0"
+authors = ["Ned Pummeroy <nedpummeroy@gmail.com>"]
+
+[lib]
+name = "statusbar"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hw"
+path = "src/main.rs"
+
+[[bin]]
+name = "cpu"
+path = "src/cpu/main.rs"
