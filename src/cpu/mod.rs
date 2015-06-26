@@ -1,37 +1,53 @@
-
 use std::io::prelude::*;
 use std::fs;
 
 use std::thread;
 use std::time;
 
-const STAT_FNAME: &'static str = "/proc/stat";
+use std::fmt;
 
-// From '% man proc`, converted to zero index.
-const IDLE_FIELD: usize = 3;
+pub fn load_since(last: &Stats) -> (Load, Stats) {
 
-pub fn measure_load() -> u64 {
-
-    // First get the inital CPU times
-    let first: CpuTimes = read_cpu_times();
-
-    // Get the CPU times a bit later
-    thread::sleep(time::Duration::from_secs(1));
-    let next: CpuTimes = read_cpu_times();
+    // Get the current cpu stats.
+    let next: Stats = read_cpu_stats();
 
     // Calculate the recent CPU load
-    let dtotal = next.total - first.total;
-    let didle = next.idle - first.idle;
+    let dtotal = next.total - last.total;
+    let didle = next.idle - last.idle;
+    let load = Load::from(((1000 * (dtotal - didle) / dtotal + 5) / 10));
 
-    (1000 * (dtotal - didle) / dtotal + 5) / 10
+    (load, next)
 }
 
-struct CpuTimes {
+pub fn measure_load(duration: time::Duration) -> (Load, Stats) {
+
+    // Get a reference point then wait a bit.
+    let first: Stats = read_cpu_stats();
+    thread::sleep(duration);
+
+    load_since(&first)
+}
+
+pub struct Stats {
     idle: u64,
     total: u64,
 }
 
-fn read_cpu_times() -> CpuTimes {
+pub struct Load(u32);
+
+impl From<u64> for Load {
+    fn from(value: u64) -> Load { Load(value as u32) }
+}
+
+impl fmt::Display for Load {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        self.0.fmt(formatter)
+    }
+}
+
+fn read_cpu_stats() -> Stats {
+    const STAT_FNAME: &'static str = "/proc/stat";
+    const IDLE_FIELD: usize = 3; // From `% man proc` (zero indexed)
 
     // Read the proc stat file.
     let mut stat_string = String::new();
@@ -54,5 +70,5 @@ fn read_cpu_times() -> CpuTimes {
     let total = field_values.iter().sum::<u64>();
     let idle = field_values[IDLE_FIELD];
 
-    CpuTimes{total: total, idle: idle}
+    Stats{total: total, idle: idle}
 }

@@ -1,4 +1,26 @@
 [root]
 name = "statusbar"
 version = "0.1.0"
+dependencies = [
+ "x11 1.2.0 (git+https://github.com/Daggerbot/x11-rs)",
+]
+
+[[package]]
+name = "libc"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "pkg-config"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "x11"
+version = "1.2.0"
+source = "git+https://github.com/Daggerbot/x11-rs#9010bec254a375a1cf521e4041870c495ead4b02"
+dependencies = [
+ "libc 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pkg-config 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 

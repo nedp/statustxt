@@ -3,14 +3,14 @@ name = "statusbar"
 version = "0.1.0"
 authors = ["Ned Pummeroy <nedpummeroy@gmail.com>"]
 
+[dependencies.x11]
+version = "1.1.1"
+git = "https://github.com/Daggerbot/x11-rs"
+features = ["xlib"]
+
 [lib]
 name = "statusbar"
 path = "src/lib.rs"
 
-[[bin]]
-name = "hw"
-path = "src/main.rs"
-
-[[bin]]
-name = "cpu"
-path = "src/cpu/main.rs"
+[profile.release]
+lto=true
