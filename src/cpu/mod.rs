@@ -45,7 +45,7 @@ impl fmt::Display for Load {
     }
 }
 
-fn read_cpu_stats() -> Stats {
+pub fn read_cpu_stats() -> Stats {
     const STAT_FNAME: &'static str = "/proc/stat";
     const IDLE_FIELD: usize = 3; // From `% man proc` (zero indexed)
 

@@ -5,3 +5,4 @@
            thread_sleep)]
 
 pub mod cpu;
+pub mod memory;
