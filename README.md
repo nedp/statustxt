@@ -1,5 +1,5 @@
-# statusbar
-A simple textual status bar for the X window manager.
+# statustxt
+A simple textual status bar for the X window system.
 
 Displays information on:
 
@@ -8,6 +8,7 @@ Displays information on:
 * Free swap space
 * AC power availability
 * Battery level
+* Time and date
 
 # Installation
 
@@ -18,4 +19,4 @@ Displays information on:
    `% cargo run --release`
 
 # Looks Like:
-`CPU[2%] RAM[2806MB] Swap[8.4GB] AC[Present] Btry[52%]`
+`CPU[2%] RAM[2806MB] Swap[8.4GB] AC[On] Btry[52%] Tue 30 Jun [01:27:50]`

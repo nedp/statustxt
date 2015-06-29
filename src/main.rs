@@ -1,12 +1,14 @@
 #![feature(thread_sleep, time, duration)]
+#![feature(result_expect)]
 
 extern crate x11;
 extern crate statusbar;
+extern crate time;
 
 use std::ptr;
 use std::ffi;
 
-use std::time;
+use std::time as stdtime;
 use std::thread;
 
 use x11::xlib;
@@ -18,7 +20,7 @@ use statusbar::power;
 const STEP_SECONDS: u64 = 1;
 
 fn main() {
-    let step = time::Duration::from_secs(STEP_SECONDS);
+    let step = stdtime::Duration::from_secs(STEP_SECONDS);
     let mut prev_cpu_stats;
 
     // Get the initial cpu stats.
@@ -55,6 +57,8 @@ struct Stats {
 
     ac_is_present: bool,
     battery_level: u32,
+
+    time: time::Tm,
 }
 
 impl Stats {
@@ -65,7 +69,7 @@ impl Stats {
     /// time equal to the step duration.
     ///
     /// Returns a 2-tuple of the initial stats and the initial cpu stats.
-    fn initial(step: time::Duration) -> (Stats, cpu::Stats) {
+    fn initial(step: stdtime::Duration) -> (Stats, cpu::Stats) {
         let (cpu_load, cpu_stats) = cpu::measure_load(step);
 
         let (available_kb, free_swap_kb) = memory::available_and_free_swap_kb();
@@ -78,6 +82,8 @@ impl Stats {
 
             ac_is_present: power::read_ac_presence(),
             battery_level: power::read_battery_level(),
+
+            time: time::now(),
         }, cpu_stats)
     }
 
@@ -101,17 +107,22 @@ impl Stats {
 
             ac_is_present: power::read_ac_presence(),
             battery_level: power::read_battery_level(),
+
+            time: time::now(),
         }, cpu_stats)
     }
 
     fn format_title(&self) -> String {
         let ac_string = match self.ac_is_present {
-            true => "Present",
-            false => "Unplugged",
+            true => "On",
+            false => "Off",
         };
-        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] AC[{}] Btry[{}%]",
+        let time_string = self.time.strftime("%a %d %b [%T]").expect(
+            "Failed to format the date and time.");
+
+        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] AC[{}] Btry[{}%] {}",
             self.cpu_load, self.available_mb, self.free_swap_gb,
-            ac_string, self.battery_level)
+            ac_string, self.battery_level, time_string)
     }
 
 }

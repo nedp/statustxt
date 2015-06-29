@@ -1,7 +1,10 @@
 [package]
-name = "statusbar"
+name = "statustxt"
 version = "0.1.0"
 authors = ["Ned Pummeroy <nedpummeroy@gmail.com>"]
+
+[dependencies]
+time = "0.1"
 
 [dependencies.x11]
 version = "1.1.1"
