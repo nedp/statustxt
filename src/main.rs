@@ -13,9 +13,9 @@ use x11::xlib;
 
 use statusbar::cpu;
 use statusbar::memory;
+use statusbar::power;
 
 const STEP_SECONDS: u64 = 1;
-
 
 fn main() {
     let step = time::Duration::from_secs(STEP_SECONDS);
@@ -23,8 +23,8 @@ fn main() {
 
     // Get the initial cpu stats.
     {
-        let (stats, prev) = Stats::initial(step);
-        prev_cpu_stats = prev;
+        let (stats, cpu_stats) = Stats::initial(step);
+        prev_cpu_stats = cpu_stats;
         let title = stats.format_title();
         unsafe { set_root_title(&title); }
     }
@@ -32,22 +32,39 @@ fn main() {
     // Each step, recalculate all values.
     loop {
         thread::sleep(step);
-        let stats = Stats::since(&mut prev_cpu_stats);
+        let (stats, cpu_stats) = Stats::since(&prev_cpu_stats);
+        prev_cpu_stats = cpu_stats;
 
         let title = stats.format_title();
         unsafe { set_root_title(&title); }
     }
 }
 
+/// A structure to store statistics on:
+///
+/// * CPU load
+/// * Available memory
+/// * Free swap memory
+/// * AC power supply presence
+/// * Battery level
 struct Stats {
     cpu_load: cpu::Load,
 
     available_mb: u32,
     free_swap_gb: f32,
+
+    ac_is_present: bool,
+    battery_level: u32,
 }
 
 impl Stats {
 
+    /// Determines the stats for the initial step.
+    ///
+    /// Does not require the previous cpu stats, but takes
+    /// time equal to the step duration.
+    ///
+    /// Returns a 2-tuple of the initial stats and the initial cpu stats.
     fn initial(step: time::Duration) -> (Stats, cpu::Stats) {
         let (cpu_load, cpu_stats) = cpu::measure_load(step);
 
@@ -58,31 +75,50 @@ impl Stats {
 
             available_mb: available_kb / 1000,
             free_swap_gb: free_swap_kb as f32 / 1_000_000_f32,
+
+            ac_is_present: power::read_ac_presence(),
+            battery_level: power::read_battery_level(),
         }, cpu_stats)
     }
 
-    fn since(prev_cpu_stats: &mut cpu::Stats) -> Stats {
+    /// Determines the stats for subsequent (not the first) steps.
+    ///
+    /// Requires the previous cpu stats, but completes (practically)
+    /// immediately.
+    ///
+    /// Returns a 2-tuple of the statusbar stats and the cpu status for
+    /// this step.
+    fn since(prev_cpu_stats: &cpu::Stats) -> (Stats, cpu::Stats) {
         let (cpu_load, cpu_stats) = cpu::load_since(prev_cpu_stats);
-        *prev_cpu_stats = cpu_stats;
 
         let (available_kb, free_swap_kb) = memory::available_and_free_swap_kb();
 
-        Stats {
+        (Stats {
             cpu_load: cpu_load,
 
             available_mb: available_kb / 1000,
             free_swap_gb: free_swap_kb as f32 / 1_000_000_f32,
-        }
+
+            ac_is_present: power::read_ac_presence(),
+            battery_level: power::read_battery_level(),
+        }, cpu_stats)
     }
 
     fn format_title(&self) -> String {
-        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB]",
-            self.cpu_load, self.available_mb, self.free_swap_gb)
+        let ac_string = match self.ac_is_present {
+            true => "Present",
+            false => "Unplugged",
+        };
+        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] AC[{}] Btry[{}%]",
+            self.cpu_load, self.available_mb, self.free_swap_gb,
+            ac_string, self.battery_level)
     }
 
 }
 
 unsafe fn set_root_title(title: &str) {
+
+    // Need a C string for the xlib interface.
     let title_cstring = ffi::CString::new(title).unwrap();
 
     // Find the root window.
