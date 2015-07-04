@@ -2,7 +2,7 @@
 #![feature(result_expect)]
 
 extern crate x11;
-extern crate statusbar;
+extern crate statustxt;
 extern crate time;
 
 use std::ptr;
@@ -13,9 +13,9 @@ use std::thread;
 
 use x11::xlib;
 
-use statusbar::cpu;
-use statusbar::memory;
-use statusbar::power;
+use statustxt::cpu;
+use statustxt::memory;
+use statustxt::power;
 
 const STEP_SECONDS: u64 = 1;
 
@@ -92,7 +92,7 @@ impl Stats {
     /// Requires the previous cpu stats, but completes (practically)
     /// immediately.
     ///
-    /// Returns a 2-tuple of the statusbar stats and the cpu status for
+    /// Returns a 2-tuple of the statustxt stats and the cpu status for
     /// this step.
     fn since(prev_cpu_stats: &cpu::Stats) -> (Stats, cpu::Stats) {
         let (cpu_load, cpu_stats) = cpu::load_since(prev_cpu_stats);
