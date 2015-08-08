@@ -15,11 +15,14 @@ use x11::xlib;
 
 use statustxt::cpu;
 use statustxt::memory;
+
+#[cfg(feature = "power")]
 use statustxt::power;
 
 const STEP_SECONDS: u64 = 1;
 
 fn main() {
+
     let step = stdtime::Duration::from_secs(STEP_SECONDS);
     let mut prev_cpu_stats;
 
@@ -47,8 +50,9 @@ fn main() {
 /// * CPU load
 /// * Available memory
 /// * Free swap memory
-/// * AC power supply presence
+/// * AC feature = "power" supply presence
 /// * Battery level
+#[cfg(feature = "power")]
 struct Stats {
     cpu_load: cpu::Load,
 
@@ -61,6 +65,7 @@ struct Stats {
     time: time::Tm,
 }
 
+#[cfg(feature = "power")]
 impl Stats {
 
     /// Determines the stats for the initial step.
@@ -74,7 +79,7 @@ impl Stats {
 
         let (available_kb, free_swap_kb) = memory::available_and_free_swap_kb();
 
-        (Stats {
+        let stats = Stats {
             cpu_load: cpu_load,
 
             available_mb: available_kb / 1000,
@@ -84,7 +89,9 @@ impl Stats {
             battery_level: power::read_battery_level(),
 
             time: time::now(),
-        }, cpu_stats)
+        };
+
+        (stats, cpu_stats)
     }
 
     /// Determines the stats for subsequent (not the first) steps.
@@ -99,7 +106,7 @@ impl Stats {
 
         let (available_kb, free_swap_kb) = memory::available_and_free_swap_kb();
 
-        (Stats {
+        let stats = Stats {
             cpu_load: cpu_load,
 
             available_mb: available_kb / 1000,
@@ -109,7 +116,9 @@ impl Stats {
             battery_level: power::read_battery_level(),
 
             time: time::now(),
-        }, cpu_stats)
+        };
+
+        (stats, cpu_stats)
     }
 
     fn format_title(&self) -> String {
@@ -123,6 +132,81 @@ impl Stats {
         format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] AC[{}] Btry[{}%] {}",
             self.cpu_load, self.available_mb, self.free_swap_gb,
             ac_string, self.battery_level, time_string)
+    }
+
+}
+
+/// A structure to store statistics on:
+///
+/// * CPU load
+/// * Available memory
+/// * Free swap memory
+#[cfg(not(feature = "power"))]
+struct Stats {
+    cpu_load: cpu::Load,
+
+    available_mb: u32,
+    free_swap_gb: f32,
+
+    time: time::Tm,
+}
+
+#[cfg(not(feature = "power"))]
+impl Stats {
+
+    /// Determines the stats for the initial step.
+    ///
+    /// Does not require the previous cpu stats, but takes
+    /// time equal to the step duration.
+    ///
+    /// Returns a 2-tuple of the initial stats and the initial cpu stats.
+    fn initial(step: stdtime::Duration) -> (Stats, cpu::Stats) {
+        let (cpu_load, cpu_stats) = cpu::measure_load(step);
+
+        let (available_kb, free_swap_kb) = memory::available_and_free_swap_kb();
+
+        let stats = Stats {
+            cpu_load: cpu_load,
+
+            available_mb: available_kb / 1000,
+            free_swap_gb: free_swap_kb as f32 / 1_000_000_f32,
+
+            time: time::now(),
+        };
+
+        (stats, cpu_stats)
+    }
+
+    /// Determines the stats for subsequent (not the first) steps.
+    ///
+    /// Requires the previous cpu stats, but completes (practically)
+    /// immediately.
+    ///
+    /// Returns a 2-tuple of the statustxt stats and the cpu status for
+    /// this step.
+    fn since(prev_cpu_stats: &cpu::Stats) -> (Stats, cpu::Stats) {
+        let (cpu_load, cpu_stats) = cpu::load_since(prev_cpu_stats);
+
+        let (available_kb, free_swap_kb) = memory::available_and_free_swap_kb();
+
+        let stats = Stats {
+            cpu_load: cpu_load,
+
+            available_mb: available_kb / 1000,
+            free_swap_gb: free_swap_kb as f32 / 1_000_000_f32,
+
+            time: time::now(),
+        };
+
+        (stats, cpu_stats)
+    }
+
+    fn format_title(&self) -> String {
+        let time_string = self.time.strftime("%a %d %b [%T]").expect(
+            "Failed to format the date and time.");
+
+        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] {}",
+            self.cpu_load, self.available_mb, self.free_swap_gb, time_string)
     }
 
 }

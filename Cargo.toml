@@ -3,6 +3,10 @@ name = "statustxt"
 version = "0.1.0"
 authors = ["Ned Pummeroy <nedpummeroy@gmail.com>"]
 
+[features]
+default = []
+power = []
+
 [dependencies]
 time = "0.1"
 
