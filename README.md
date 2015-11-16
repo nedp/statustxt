@@ -19,4 +19,4 @@ Displays information on:
    `% cargo run --release`
 
 # Looks Like:
-`CPU[2%] RAM[2806MB] Swap[8.4GB] AC[On] Btry[52%] Tue 30 Jun [01:27:50]`
+`C[2%] R[2806MB] S[8.4GB] AC[On] B[52%] Tue 30 Jun [01:27:50]`

@@ -129,7 +129,7 @@ impl Stats {
         let time_string = self.time.strftime("%a %d %b [%T]").expect(
             "Failed to format the date and time.");
 
-        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] AC[{}] Btry[{}%] {}",
+        format!("C[{}%] R[{}MB] S[{:.1}GB] AC[{}] B[{}%] {}",
             self.cpu_load, self.available_mb, self.free_swap_gb,
             ac_string, self.battery_level, time_string)
     }
@@ -205,7 +205,7 @@ impl Stats {
         let time_string = self.time.strftime("%a %d %b [%T]").expect(
             "Failed to format the date and time.");
 
-        format!("CPU[{}%] RAM[{}MB] Swap[{:.1}GB] {}",
+        format!("C[{}%] R[{}MB] S[{:.1}GB] {}",
             self.cpu_load, self.available_mb, self.free_swap_gb, time_string)
     }
 
