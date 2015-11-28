@@ -1,8 +1,4 @@
-#![feature(result_expect,
-           iter_arith,
-           time,
-           duration,
-           thread_sleep)]
+#![feature(iter_arith)]
 
 pub mod cpu;
 pub mod memory;

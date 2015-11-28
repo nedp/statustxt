@@ -1,6 +1,3 @@
-#![feature(thread_sleep, time, duration)]
-#![feature(result_expect)]
-
 extern crate x11;
 extern crate statustxt;
 extern crate time;
@@ -50,8 +47,7 @@ fn main() {
 /// * CPU load
 /// * Available memory
 /// * Free swap memory
-/// * AC feature = "power" supply presence
-/// * Battery level
+/// * "power" feature = power supply presence + battery level
 #[cfg(feature = "power")]
 struct Stats {
     cpu_load: cpu::Load,
@@ -60,7 +56,7 @@ struct Stats {
     free_swap_gb: f32,
 
     ac_is_present: bool,
-    battery_level: u32,
+    battery_level: Option<u32>,
 
     time: time::Tm,
 }
@@ -122,16 +118,19 @@ impl Stats {
     }
 
     fn format_title(&self) -> String {
+        use std::str::FromStr;
         let ac_string = match self.ac_is_present {
             true => "On",
             false => "Off",
         };
         let time_string = self.time.strftime("%a %d %b [%T]").expect(
             "Failed to format the date and time.");
-
-        format!("C[{}%] R[{}MB] S[{:.1}GB] AC[{}] B[{}%] {}",
+        let battery_string =
+            self.battery_level.map_or(FromStr::from_str("N/A").unwrap(),
+                                      |level| format!("{}%", level));
+        format!("C[{}%] R[{}MB] S[{:.1}GB] AC[{}] B[{}] {}",
             self.cpu_load, self.available_mb, self.free_swap_gb,
-            ac_string, self.battery_level, time_string)
+            ac_string, battery_string, time_string)
     }
 
 }

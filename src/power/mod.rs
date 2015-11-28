@@ -1,6 +1,8 @@
 use std::io::prelude::*;
 use std::fs;
 
+/// Returns true if the machine is connected to an AC power supply,
+/// else false.
 pub fn read_ac_presence() -> bool {
     const FNAME: &'static str = "/sys/class/power_supply/AC/online";
 
@@ -18,16 +20,22 @@ pub fn read_ac_presence() -> bool {
     }
 }
 
-pub fn read_battery_level() -> u32 {
+/// Returns the battery level as a percentage.
+///
+/// Needs to be optional because you can take the battery out of a laptop.
+pub fn read_battery_level() -> Option<u32> {
     const FNAME: &'static str = "/sys/class/power_supply/BAT0/capacity";
 
     // Read the file.
-    let mut string = String::new();
-    let mut file = fs::File::open(FNAME).expect(
-        "Couldn't open the battery capacity file");
-    file.read_to_string(&mut string).expect(
-        "Couldn't read from the battery capacity file");
-
-    string.trim().parse().expect(
-        "Failed to parse the battery level file.")
+    let string_opt =
+        if let Ok(mut file) = fs::File::open(FNAME) {
+            let mut string = String::new();
+            file.read_to_string(&mut string).expect(
+                              "Couldn't read from the battery capacity file.");
+            Some(string)
+        } else {
+            None
+        };
+    string_opt.map(|s| s.trim().parse().expect(
+        "Failed to parse the battery level file."))
 }
