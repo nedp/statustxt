@@ -14,7 +14,7 @@ Displays information on:
 # Installation
 
 1. Install rustc and cargo, available
-   [http://www.rust-lang.org/](here).
+   [here](http://www.rust-lang.org/).
 2. Clone this repository.
 3. Inside the repository, run the command:
    `% cargo run --release`
