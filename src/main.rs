@@ -120,15 +120,15 @@ impl Stats {
     fn format_title(&self) -> String {
         use std::str::FromStr;
         let ac_string = match self.ac_is_present {
-            true => "On",
-            false => "Off",
+            true => "AC",
+            false => "B",
         };
         let time_string = self.time.strftime("%a %d %b [%T]").expect(
             "Failed to format the date and time.");
         let battery_string =
             self.battery_level.map_or(FromStr::from_str("N/A").unwrap(),
                                       |level| format!("{}%", level));
-        format!("C[{}%] R[{}MB] S[{:.1}GB] AC[{}] B[{}] {}",
+        format!("C[{}%] R[{}MB] S[{:.1}GB] {}[{}] {}",
             self.cpu_load, self.available_mb, self.free_swap_gb,
             ac_string, battery_string, time_string)
     }

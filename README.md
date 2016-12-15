@@ -1,4 +1,5 @@
 # statustxt
+
 A simple textual status bar for the X window system.
 
 Displays information on:
@@ -19,4 +20,5 @@ Displays information on:
    `% cargo run --release`
 
 # Looks Like:
-`C[2%] R[2806MB] S[8.4GB] AC[On] B[52%] Tue 30 Jun [01:27:50]`
+
+`C[2%] R[2806MB] S[8.4GB] AC[52%] Tue 30 Jun [01:27:50]`
