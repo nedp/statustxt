@@ -39,3 +39,9 @@ dependencies = [
  "pkg-config 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
+[metadata]
+"checksum gcc 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)" = "a513778819ab90cf253c6a60a28925e8abe5c25752719adc3a3ecc8561664c8c"
+"checksum libc 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "a64b9ad3eea69f6f43b87c07c0534505a68c8834ad4c6bad4089de15e45cec83"
+"checksum pkg-config 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)" = "71048206ec7132fc63b492abfec77a7a66059ed2b5fbbff59ac16a7b4a2cc495"
+"checksum time 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)" = "1f9b6beb332c0937884a444f14d63872d44b75cc228c387b332dff50fb232e18"
+"checksum x11 1.2.0 (git+https://github.com/Daggerbot/x11-rs)" = "<none>"
