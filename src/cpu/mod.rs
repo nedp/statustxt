@@ -36,7 +36,9 @@ pub struct Stats {
 pub struct Load(u32);
 
 impl From<u64> for Load {
-    fn from(value: u64) -> Load { Load(value as u32) }
+    fn from(value: u64) -> Load {
+        Load(value as u32)
+    }
 }
 
 impl fmt::Display for Load {
@@ -51,24 +53,27 @@ pub fn read_cpu_stats() -> Stats {
 
     // Read the proc stat file.
     let mut stat_string = String::new();
-    let mut stat_file = fs::File::open(STAT_FNAME).expect(
-        "Couldn't open the proc stat file");
-    stat_file.read_to_string(&mut stat_string).expect(
-        "Couldn't read from the proc stat file");
-    let stat_line = stat_string.lines().next().expect(
-        "Couldn't get first line from the proc stat file");
+    let mut stat_file = fs::File::open(STAT_FNAME).expect("Couldn't open the proc stat file");
+    stat_file.read_to_string(&mut stat_string)
+        .expect("Couldn't read from the proc stat file");
+    let stat_line = stat_string.lines()
+        .next()
+        .expect("Couldn't get first line from the proc stat file");
 
     // Parse the cpu time values from the first proc stat line.
-    let mut fields = stat_line.split_whitespace().skip(1);
-    let mut field_values: [u64; 10] = [0; 10];
-    for i in 0..10 {
-        let field = fields.next().expect(
-                &format!("Couldn't retrieve field #{} from the proc stat file", i));
-        field_values[i] = field.parse::<u64>().expect(
-                &format!("Couldn't parse field #{} from the proc stat file", i));
-    }
+    let fields = stat_line.split_whitespace()
+        .skip(1);
+    let field_values = fields.enumerate()
+        .map(|(i, field)| {
+            field.parse::<u64>()
+                .expect(&format!("Couldn't #{}th proc stat file field", i))
+        })
+        .collect::<Vec<_>>();
     let total = field_values.iter().sum::<u64>();
     let idle = field_values[IDLE_FIELD];
 
-    Stats{total: total, idle: idle}
+    Stats {
+        total: total,
+        idle: idle,
+    }
 }

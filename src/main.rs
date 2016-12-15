@@ -28,7 +28,9 @@ fn main() {
         let (stats, cpu_stats) = Stats::initial(step);
         prev_cpu_stats = cpu_stats;
         let title = stats.format_title();
-        unsafe { set_root_title(&title); }
+        unsafe {
+            set_root_title(&title);
+        }
     }
 
     // Each step, recalculate all values.
@@ -38,7 +40,9 @@ fn main() {
         prev_cpu_stats = cpu_stats;
 
         let title = stats.format_title();
-        unsafe { set_root_title(&title); }
+        unsafe {
+            set_root_title(&title);
+        }
     }
 }
 
@@ -63,7 +67,6 @@ struct Stats {
 
 #[cfg(feature = "power")]
 impl Stats {
-
     /// Determines the stats for the initial step.
     ///
     /// Does not require the previous cpu stats, but takes
@@ -123,16 +126,18 @@ impl Stats {
             true => "AC",
             false => "B",
         };
-        let time_string = self.time.strftime("%a %d %b [%T]").expect(
-            "Failed to format the date and time.");
-        let battery_string =
-            self.battery_level.map_or(FromStr::from_str("N/A").unwrap(),
-                                      |level| format!("{}%", level));
+        let time_string =
+            self.time.strftime("%a %d %b [%T]").expect("Failed to format the date and time.");
+        let battery_string = self.battery_level.map_or(FromStr::from_str("N/A").unwrap(),
+                                                       |level| format!("{}%", level));
         format!("C[{}%] R[{}MB] S[{:.1}GB] {}[{}] {}",
-            self.cpu_load, self.available_mb, self.free_swap_gb,
-            ac_string, battery_string, time_string)
+                self.cpu_load,
+                self.available_mb,
+                self.free_swap_gb,
+                ac_string,
+                battery_string,
+                time_string)
     }
-
 }
 
 /// A structure to store statistics on:
@@ -152,7 +157,6 @@ struct Stats {
 
 #[cfg(not(feature = "power"))]
 impl Stats {
-
     /// Determines the stats for the initial step.
     ///
     /// Does not require the previous cpu stats, but takes
@@ -201,13 +205,15 @@ impl Stats {
     }
 
     fn format_title(&self) -> String {
-        let time_string = self.time.strftime("%a %d %b [%T]").expect(
-            "Failed to format the date and time.");
+        let time_string =
+            self.time.strftime("%a %d %b [%T]").expect("Failed to format the date and time.");
 
         format!("C[{}%] R[{}MB] S[{:.1}GB] {}",
-            self.cpu_load, self.available_mb, self.free_swap_gb, time_string)
+                self.cpu_load,
+                self.available_mb,
+                self.free_swap_gb,
+                time_string)
     }
-
 }
 
 unsafe fn set_root_title(title: &str) {

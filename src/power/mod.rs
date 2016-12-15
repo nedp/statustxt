@@ -8,10 +8,9 @@ pub fn read_ac_presence() -> bool {
 
     // Read the file.
     let mut string = String::new();
-    let mut file = fs::File::open(FNAME).expect(
-        "Couldn't open the ac presence file");
-    file.read_to_string(&mut string).expect(
-        "Couldn't read from the ac presence file");
+    let mut file = fs::File::open(FNAME).expect("Couldn't open the ac presence file");
+    file.read_to_string(&mut string)
+        .expect("Couldn't read from the ac presence file");
 
     match string[..].trim().parse() {
         Ok(1) => true,
@@ -27,15 +26,14 @@ pub fn read_battery_level() -> Option<u32> {
     const FNAME: &'static str = "/sys/class/power_supply/BAT0/capacity";
 
     // Read the file.
-    let string_opt =
-        if let Ok(mut file) = fs::File::open(FNAME) {
+    fs::File::open(FNAME)
+        .ok()
+        .map(|mut file| {
             let mut string = String::new();
-            file.read_to_string(&mut string).expect(
-                              "Couldn't read from the battery capacity file.");
-            Some(string)
-        } else {
-            None
-        };
-    string_opt.map(|s| s.trim().parse().expect(
-        "Failed to parse the battery level file."))
+            file.read_to_string(&mut string)
+                .expect("Couldn't read from the battery capacity file.");
+            string.trim()
+                .parse()
+                .expect("Failed to parse the battery level file.")
+        })
 }
